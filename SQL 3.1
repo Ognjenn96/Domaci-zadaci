@@ -1,0 +1,74 @@
+ ---Zadatak 1 Za svaku sezonu prikažite ukupan broj utakmica, ukupan broj postignutih golova i prosečan broj golova po utakmici.
+
+ SELECT season,
+ Count(*) AS total_matches,
+ SUM(home_goals + away_goals) AS total_goals,
+ ROUND(AVG(home_goals + away_goals)) AS avg_goals
+ FROM matches_flat
+ Group BY season ;
+
+--- Zadatak 2 Za svaki stadion prikažite najmanju, najveću i prosečnu zabeleženu posetu, kao i broj utakmica za koje je poseta poznata
+
+SELECT stadium_name,
+MIN(attendance) AS minimum_attendance,
+MAX(attendance) AS maximum_attendance,
+AVG(attendance) AS average_attendance,
+COUNT(attendance)
+FROM matches_flat
+GROUP BY stadium_name;
+
+--- Zadatak 3 Prikažite sudije koje su sudile najmanje 10 utakmica i koje su ukupno pokazale najmanje 20 žutih kartona. Prikažite ime sudije, broj utakmica i ukupan broj žutih kartona.
+
+SELECT referee_name,
+COUNT(*) AS total_matches,
+SUM(home_yellow_cards + away_yellow_cards) AS total_yellow_cards
+FROM matches_flat
+GROUP BY referee_name
+HAVING total_matches >= 10 AND total_yellow_cards >= 20 ;
+
+--- Zadatak 4  Podelite utakmice prema ukupnom broju golova na kategorije Bez golova (0), Malo golova (1 ili 2) i Mnogo golova (3 ili više). Prikažite broj utakmica u svakoj kategoriji i najveći broj golova na utakmici u toj kategoriji.
+
+ SELECT
+    CASE
+WHEN home_goals + away_goals = 0 THEN 'Bez golova'
+WHEN home_goals + away_goals <= 2 THEN 'Malo golova'
+ELSE 'Mnogo golova'
+END AS kategorija,
+COUNT(*) AS broj_utakmica,
+MAX(home_goals + away_goals) AS najvise_golova
+FROM matches_flat
+WHERE home_goals IS NOT NULL
+AND away_goals IS NOT NULL
+GROUP BY kategorija;
+
+---Zadatak 5 Za svaki klub prikažite broj utakmica koje je odigrao kao domaćin, broj pobeda kod kuće i broj poraza kod kuće. U rezultat uključite samo klubove koji su kod kuće odigrali najmanje 10 utakmica.
+
+SELECT home_team,
+COUNT(*) AS broj_utakmica,
+SUM(CASE WHEN home_goals > away_goals THEN 1 ELSE 0 END) AS pobede_domacina,
+SUM(CASE WHEN home_goals < away_goals THEN 1 ELSE 0 END) AS porazi_domacina
+FROM matches_flat
+GROUP BY home_team
+HAVING COUNT(*) >= 10;
+
+---Zadatak 6 Za svakog sudiju prikažite ukupan broj utakmica, broj utakmica u kojima je pokazao bar jedan crveni karton i procenat takvih utakmica u odnosu na sve utakmice koje je sudio.
+
+SELECT referee_name,COUNT(*) AS broj_utakmica,
+ SUM(CASE WHEN home_red_cards + away_red_cards > 0 THEN 1
+ELSE 0 END) AS utakmice_sa_crvenim,
+ROUND(100.0 * SUM(CASE WHEN home_red_cards + away_red_cards > 0 THEN 1
+ ELSE 0 END) / COUNT(*), 2) AS procenat
+FROM matches_flat
+GROUP BY referee_name
+ORDER BY procenat DESC;
+
+---Zadatak 7 Za svaku sezonu prikažite broj pobeda domaćina, broj nerešenih utakmica i broj pobeda gostiju. Takođe prikažite procenat utakmica koje su završene nerešenim rezultatom.
+SELECT season,
+SUM(CASE WHEN home_goals > away_goals THEN 1 ELSE 0 END) AS pobede_domacina,
+SUM(CASE WHEN home_goals = away_goals THEN 1 ELSE 0 END) AS nereseno,
+SUM(CASE WHEN home_goals < away_goals THEN 1 ELSE 0 END) AS pobede_gostiju,
+ROUND(100.0 * SUM(CASE WHEN home_goals = away_goals THEN 1 ELSE 0 END) / COUNT(*), 2) AS procenat_neresenih
+FROM matches_flat
+WHERE status = 'played'
+GROUP BY season;
+
