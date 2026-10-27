@@ -1,0 +1,194 @@
+--- Kingsbridge City je izabran klub
+
+--1.
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Kingsbridge City')
+
+SELECT COUNT(*) AS utakmice,SUM(CASE
+WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)
+THEN 1 ELSE 0 END) AS pobede,
+SUM(CASE WHEN m.home_goals = m.away_goals
+THEN 1 ELSE 0 END) AS neresene,
+
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals < m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals < m.home_goals)
+THEN 1 ELSE 0 END) AS porazi,
+
+SUM(CASE WHEN m.home_team_id = c.team_id THEN m.home_goals
+ELSE m.away_goals END) AS dati_golovi,
+
+SUM(CASE WHEN m.home_team_id = c.team_id THEN m.away_goals
+ELSE m.home_goals END) AS primljeni_golovi,
+
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)
+THEN 3 WHEN m.home_goals = m.away_goals THEN 1 ELSE 0
+END) AS bodovi
+
+FROM matches m
+JOIN club c
+ON m.home_team_id = c.team_id
+OR m.away_team_id = c.team_id
+
+WHERE m.season = '2024/25'
+AND m.status = 'played';
+
+---2
+WITH club AS (SELECT team_id
+FROM teams
+ WHERE team_name = 'Kingsbridge City')
+
+SELECT CASE
+WHEN m.home_team_id = c.team_id THEN 'Kod kuce'
+ELSE 'U gostima'
+END AS mesto,
+COUNT(*) AS utakmice,
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)
+THEN 1 ELSE 0 END) AS pobede,
+SUM(CASE WHEN m.home_goals = m.away_goals THEN 1 ELSE 0 END) AS neresene,
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals < m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals < m.home_goals) THEN 1 ELSE 0
+END) AS porazi,
+
+SUM(CASE WHEN m.home_team_id = c.team_id THEN m.home_goals ELSE m.away_goals END) AS dati_golovi,
+SUM(CASE WHEN m.home_team_id = c.team_id THEN m.away_goals ELSE m.home_goals END) AS primljeni_golovi,
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)THEN 3
+WHEN m.home_goals = m.away_goals THEN 1
+ELSE 0 END) AS bodovi
+FROM matches m
+JOIN club c
+ON m.home_team_id = c.team_id OR m.away_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played'
+GROUP BY mesto;
+
+---3 najbolji strelci
+WITH club AS (SELECT team_id
+FROM teams
+WHERE team_name = 'Kingsbridge City')
+
+SELECT p.first_name, p.last_name,
+COUNT(*) AS broj_golova
+FROM match_events e
+JOIN players p ON e.player_id = p.player_id
+JOIN matches m ON e.match_id = m.match_id
+JOIN club c ON e.team_id = c.team_id
+WHERE m.season = '2024/25'
+AND e.event_type IN ('goal', 'penalty_goal')
+GROUP BY p.first_name, p.last_name
+ORDER BY broj_golova DESC
+LIMIT 3;
+
+---3 najbolji asistenti
+
+WITH club AS (SELECT team_id
+FROM teams
+ WHERE team_name = 'Kingsbridge City')
+
+SELECT p.first_name, p.last_name,
+COUNT(*) AS asistencije
+FROM match_events e
+JOIN players p ON e.related_player_id = p.player_id
+JOIN matches m ON e.match_id = m.match_id
+JOIN club c ON e.team_id = c.team_id
+WHERE m.season = '2024/25'
+AND e.event_type IN ('goal', 'penalty_goal')
+GROUP BY p.first_name, p.last_name
+ORDER BY asistencije DESC
+LIMIT 1;
+
+---4
+WITH club AS ( SELECT team_id
+FROM teams
+WHERE team_name = 'Kingsbridge City')
+
+SELECT ROUND(SUM(CASE WHEN m.home_team_id = c.team_id
+THEN m.home_yellow_cards + m.home_red_cards
+ELSE m.away_yellow_cards + m.away_red_cards
+END) * 1.0 / COUNT(*), 2 ) AS prosek_kluba,
+
+(SELECT ROUND( SUM(home_yellow_cards + away_yellow_cards + home_red_cards + away_red_cards) * 1.0
+/ (COUNT(*) * 2), 2)
+FROM matches_flat
+WHERE season = '2024/25'
+AND status = 'played') AS prosek_lige
+FROM matches_flat m
+JOIN club c
+ON m.home_team_id = c.team_id OR m.away_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played';
+
+---5 
+WITH club AS (SELECT team_id
+FROM teams
+WHERE team_name = 'Kingsbridge City')
+SELECT CASE WHEN m.home_team_id = c.team_id THEN m.home_manager
+ELSE m.away_manager END AS trener,
+COUNT(*) AS utakmice,
+SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)
+THEN 3 WHEN m.home_goals = m.away_goals THEN 1 ELSE 0
+END) AS bodovi,
+ROUND( SUM(CASE WHEN (m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals)THEN 3
+WHEN m.home_goals = m.away_goals THEN 1
+ELSE 0 END) * 1.0 / COUNT(*), 2)
+AS bodovi_po_utakmici
+FROM matches_flat m
+JOIN club c
+ON m.home_team_id = c.team_id OR m.away_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played'
+GROUP BY trener;
+
+---6 Najveca pobeda
+WITH club AS ( SELECT team_id
+FROM teams WHERE team_name = 'Kingsbridge City')
+
+SELECT m.home_team, m.away_team, m.home_goals,m.away_goals,
+CASE WHEN m.home_team_id = c.team_id THEN m.home_goals - m.away_goals
+ELSE m.away_goals - m.home_goals END AS gol_razlika
+FROM matches_flat m
+JOIN club c
+ON m.home_team_id = c.team_id OR m.away_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played'
+AND ((m.home_team_id = c.team_id AND m.home_goals > m.away_goals)
+ OR (m.away_team_id = c.team_id AND m.away_goals > m.home_goals))
+ORDER BY gol_razlika DESC
+LIMIT 1;
+
+---6 Najtezi poraz
+WITH club AS ( SELECT team_id
+FROM teams
+WHERE team_name = 'Kingsbridge City')
+SELECT m.home_team, m.away_team, m.home_goals, m.away_goals,
+CASE WHEN m.home_team_id = c.team_id THEN m.away_goals - m.home_goals
+ELSE m.home_goals - m.away_goals END AS gol_razlika
+FROM matches_flat m
+JOIN club c
+ON m.home_team_id = c.team_id OR m.away_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played'
+AND ((m.home_team_id = c.team_id AND m.home_goals < m.away_goals)
+OR (m.away_team_id = c.team_id AND m.away_goals < m.home_goals))
+ORDER BY gol_razlika DESC
+LIMIT 1;
+--- 7
+WITH club AS (SELECT team_id
+FROM teams
+WHERE team_name = 'Kingsbridge City')
+SELECT ROUND(AVG(m.attendance), 2) AS prosecna_poseta,
+ROUND(AVG(m.attendance * 100.0 / m.stadium_capacity), 2)
+AS popunjenost_procenat,
+SUM(CASE WHEN m.attendance IS NULL THEN 1 ELSE 0
+END) AS bez_podataka
+FROM matches_flat m
+JOIN club c ON m.home_team_id = c.team_id
+WHERE m.season = '2024/25'
+AND m.status = 'played';
