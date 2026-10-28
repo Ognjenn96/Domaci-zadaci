@@ -1,0 +1,65 @@
+
+--- ZADATAK 1
+
+SELECT p.first_name, p.last_name,
+COUNT(*) AS golovi,
+DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS rang
+
+FROM match_events e
+JOIN matches m ON e.match_id = m.match_id
+JOIN players p ON e.player_id = p.player_id
+
+WHERE m.season = '2024/25'
+AND m.status = 'played'
+AND e.event_type IN ('goal', 'penalty_goal')
+
+GROUP BY p.player_id, p.first_name, p.last_name
+ORDER BY golovi DESC;
+
+---ZADATAK 2
+
+WITH golovi AS ( SELECT e.team_id, e.player_id,
+COUNT(*) AS broj_golova
+FROM match_events e
+JOIN matches m ON e.match_id = m.match_id
+WHERE m.season = '2024/25'
+AND e.event_type IN ('goal', 'penalty_goal')
+GROUP BY e.team_id, e.player_id)
+
+SELECT t.team_name, p.first_name, p.last_name, g.broj_golova
+FROM golovi g
+JOIN teams t ON g.team_id = t.team_id
+JOIN players p ON g.player_id = p.player_id
+
+QUALIFY ROW_NUMBER() OVER ( PARTITION BY g.team_id
+ORDER BY g.broj_golova DESC, g.player_id) <= 3
+
+ORDER BY t.team_name, g.broj_golova DESC;
+
+---ZADATAK 3
+WITH utakmice AS ( SELECT match_id, kickoff_ts,
+home_team_id AS team_id,
+home_team AS klub,
+home_goals AS golovi
+FROM matches_flat
+WHERE season = '2024/25'
+AND status = 'played'
+
+UNION ALL
+
+SELECT match_id, kickoff_ts,
+away_team_id AS team_id,
+away_team AS klub,
+away_goals AS golovi
+FROM matches_flat
+WHERE season = '2024/25'
+AND status = 'played')
+
+SELECT klub, kickoff_ts, golovi,
+LAG(golovi) OVER ( PARTITION BY team_id
+ORDER BY kickoff_ts, match_id)
+AS prethodni_golovi,
+golovi - LAG(golovi) OVER (PARTITION BY team_id
+ORDER BY kickoff_ts, match_id) AS razlika
+FROM utakmice
+ORDER BY klub, kickoff_ts, match_id;
