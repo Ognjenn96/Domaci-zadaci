@@ -1,0 +1,61 @@
+---Zadatak 1
+
+WITH utakmice AS ( SELECT season, match_id, kickoff_ts,
+home_team_id AS team_id,
+home_team AS klub,
+home_goals AS golovi
+FROM matches_flat
+WHERE status = 'played'
+
+UNION ALL
+
+ SELECT season, match_id, kickoff_ts,
+away_team_id AS team_id,
+away_team AS klub,
+away_goals AS golovi
+FROM matches_flat
+WHERE status = 'played'),
+
+prosek AS ( SELECT
+season, klub, kickoff_ts,
+ROUND(AVG(golovi) OVER ( PARTITION BY season, team_id
+ORDER BY kickoff_ts, match_id
+ROWS BETWEEN 4 PRECEDING AND CURRENT ROW), 2) AS prosek_5,
+COUNT(*) OVER (PARTITION BY season, team_id
+ ORDER BY kickoff_ts, match_id
+ROWS BETWEEN 4 PRECEDING AND CURRENT ROW) AS broj_utakmica
+FROM utakmice)
+SELECT season, klub, kickoff_ts, prosek_5
+FROM prosek
+WHERE broj_utakmica = 5
+ORDER BY prosek_5 DESC
+LIMIT 1;
+
+---Zadatak 2 
+WITH utakmice AS ( SELECT match_id, kickoff_ts,
+home_team_id AS team_id,
+home_team AS klub,
+home_goals AS golovi
+FROM matches_flat
+WHERE season = '2024/25'
+AND status = 'played'
+
+UNION ALL
+
+SELECT match_id, kickoff_ts,
+away_team_id AS team_id,
+away_team AS klub,
+away_goals AS golovi
+FROM matches_flat
+WHERE season = '2024/25'
+AND status = 'played'),
+zbir AS (SELECT klub, kickoff_ts, match_id,
+SUM(golovi) OVER ( PARTITION BY team_id
+ORDER BY kickoff_ts, match_id
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS ukupno_golova
+FROM utakmice)
+SELECT klub, kickoff_ts, ukupno_golova
+FROM zbir
+WHERE ukupno_golova >= 50
+ORDER BY kickoff_ts, match_id
+LIMIT 1;
