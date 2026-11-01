@@ -1,0 +1,15 @@
+---1. Kreiranje dimenzije igrača Na osnovu tabele players napravite tabelu dim_player koja sadrži sledeće kolone: playerid, ime, prezime, poziciju i nacionalnost igrača.Koliko redova ima novokreirana tabela?
+
+CREATE OR REPLACE TABLE dim_player AS
+SELECT
+    player_id,
+    first_name AS ime,
+    last_name AS prezime,
+    position AS pozicija,
+    nationality AS nacionalnost
+FROM players;
+
+SELECT *
+FROM dim_player;
+
+
