@@ -1,0 +1,91 @@
+7.1 
+for hour in range(24):
+    if hour >= 22 or hour < 6:
+        print(hour, 'Noc')
+    elif hour < 12:
+        print(hour, 'Jutro')
+    elif hour < 18:
+        print(hour, 'Popodne')
+    else:
+        print(hour, 'Vece')
+
+7.2 
+1.
+Napisati program kojim se prevodi temperatura iz Celzijusove skale u Farenhajtovu skalu,
+ako je odgovaraju ́ca formula oblika T[
+◦F] = T[
+◦C] · 1.80 + 32. Na ulazu se unosi vrednost
+temperature u stepenima Celzijusa (realan broj) a ispisuje se vrednost temperature u stepenima
+Farenhajta.
+
+def temperatura(celzijus):
+    return celzijus * 1.8 + 32
+
+print(temperatura(25))
+
+2.
+Napisati program koji za uneti redni broj dana u nedelji (od 1 do 7) ispisuje naziv tog
+dana (ponedeljak - nedelja). Ukoliko je unet broj koji nije izmed ̄u 1 i 7, ispisati Pogresan
+unos.
+
+dani = ['Ponedeljak', 'Utorak', 'Sreda', 'Cetvrtak', 'Petak', 'Subota', 'Nedelja']
+
+def dan_u_nedelji(broj):
+    if broj < 1 or broj > 7:
+        return 'Pogresan unos'
+    else:
+        return dani[broj - 1]
+
+print(dan_u_nedelji(4))
+
+3. Napisati program koji raˇcuna najve ́ci negativni element u listi.
+
+lista = [-12, 5, -3, 8, -20, -7]
+
+def najveci_negativni(lista):
+    najveci = None
+
+    for broj in lista:
+        if broj < 0:
+            if najveci is None or broj > najveci:
+                najveci = broj
+
+    return najveci
+
+print(najveci_negativni(lista))
+
+
+5. Napisati program koji raˇcuna broj parnih elemenata date liste.
+
+lista = [3, 8, 12, 15, 21, 24, 30]
+
+def parni_brojevi(lista):
+    brojac = 0
+
+    for broj in lista:
+        if broj % 2 == 0:
+            brojac += 1
+
+    return brojac
+
+print(parni_brojevi(lista))
+
+6.  Napisati program koji raˇcuna sume elemenata liste celih brojeva koji su deljivi sa 2 odnosno
+sa 3.
+
+lista = [10, 12, 15, 18, 21, 24, 27, 30]
+
+def zbir_brojeva(lista):
+    zbir2 = 0
+    zbir3 = 0
+
+    for broj in lista:
+        if broj % 2 == 0:
+            zbir2 += broj
+
+        if broj % 3 == 0:
+            zbir3 += broj
+
+    return zbir2, zbir3
+
+print(zbir_brojeva(lista))
