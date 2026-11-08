@@ -1,0 +1,179 @@
+# 16. Napisati funkciju count_lines(path: str) -> int
+# koja vraca broj nepraznih redova u fajlu
+# Input: 'data/raw/teams.csv'
+# Output: 5
+
+import csv
+
+def count_lines(path: str) -> int:
+    lines = 0
+
+    with open(path, 'r') as f:
+        for line in f:
+            if line.strip():
+                lines += 1
+
+    return lines
+
+print(count_lines('data/raw/teams.csv'))
+
+# 17. Napisati funkciju read_column(path: str, column: str) -> list
+# koja vraca sve vrednosti jedne kolone CSV fajla
+# Ako kolona ne postoji, vratiti []
+# Input: 'data/raw/teams.csv', 'city'
+
+import csv
+
+def read_column(path: str, column: str) -> list:
+    column_values = []
+
+    with open(path, 'r') as f:
+        teams = csv.DictReader(f)
+
+        for team in teams:
+            if column in team:
+                column_values.append(team[column])
+
+    return column_values
+
+print(read_column('data/raw/teams.csv', 'city'))
+ rezultat
+['Bela Palanka', 'Niš', 'Beograd, Rakovica', 'Kraljevo']
+
+
+# 18. Napisati funkciju write_key_value(path: str, data: dict, headers: list) -> None
+# koja recnik upisuje u CSV fajl sa dve kolone
+# Input: 'data/processed/summary.csv', {'rows': 10, 'valid': 6}, ['metric', 'value']
+
+import csv
+
+def write_key_value(path: str, data: dict, headers: list) -> None:
+    data_lista = list(data.items())
+    data_lista.insert(0, headers)
+
+    with open(path, 'w', newline='') as f:
+        csv.writer(f).writerows(data_lista)
+
+write_key_value('data/processed/summary.csv',
+                {'rows': 10, 'valid': 6},
+                ['metric', 'value'])
+
+with open('data/processed/summary.csv', 'r') as f:
+    print(f.read())
+
+rezultat
+
+metric,value
+rows,10
+valid,6
+
+
+# 19. Napisati funkciju get_header(path: str) -> list
+# koja vraca zaglavlje CSV fajla
+# Koristiti csv.reader i next()
+# Input: 'data/raw/teams.csv'
+
+import csv
+
+def get_header(path: str) -> list:
+    with open(path, 'r') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    return header
+
+print(get_header('data/raw/teams.csv'))
+
+rezultat
+['team', 'city', 'points']
+
+# 20. Napisati funkciju read_rows(path: str) -> list
+# koja vraca sve redove CSV fajla bez zaglavlja
+# Koristiti csv.reader
+# Input: 'data/raw/teams.csv'
+
+import csv
+
+def read_rows(path: str) -> list:
+    with open(path, 'r') as f:
+        reader = csv.reader(f)
+        rows = []
+
+        for row in reader:
+            rows.append(row)
+
+    return rows[1:]
+
+print(read_rows('data/raw/teams.csv'))
+ rezultat
+
+ [['FK Jedinstvo', 'Bela Palanka', '34'], ['FK Radnički', 'Niš', '41'], ['FK Rakovica', 'Beograd, Rakovica', '28'], ['FK Sloga', 'Kraljevo', '19']]
+
+ # 21. Napisati funkciju total_points(path: str) -> int
+# koja vraca zbir bodova svih timova
+# Koristiti csv.DictReader
+# Input: 'data/raw/teams.csv'
+# Output: 122
+
+import csv
+
+def total_points(path: str) -> int:
+    points = 0
+
+    with open(path, 'r') as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            points += int(row['points'])
+
+    return points
+
+print(total_points('data/raw/teams.csv'))
+
+# 22. Napisati funkciju write_rows(path: str, rows: list) -> None
+# koja listu listi upisuje u CSV fajl
+# Input: 'data/processed/people.csv', [['name', 'age'], ['Ana', 20], ['Marko', 22]]
+
+import csv
+
+def write_rows(path: str, rows: list) -> None:
+    with open(path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(rows)
+
+write_rows('data/processed/people.csv',
+           [['name', 'age'], ['Ana', 20], ['Marko', 22]])
+
+with open('data/processed/people.csv', 'r') as f:
+    print(f.read())
+
+rezultat
+name,age
+Ana,20
+Marko,22
+
+
+# 23. Napisati funkciju write_dicts(path: str, rows: list) -> None
+# koja listu recnika upisuje u CSV fajl
+# Koristiti csv.DictWriter
+# Input: 'data/processed/people.csv', [{'name': 'Ana', 'age': 20}, {'name': 'Marko', 'age': 22}]
+
+import csv
+
+def write_dicts(path: str, rows: list) -> None:
+    headings = list(rows[0].keys())
+
+    with open(path, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=headings)
+        writer.writeheader()
+        writer.writerows(rows)
+
+write_dicts('data/processed/people.csv',
+            [{'name': 'Ana', 'age': 20}, {'name': 'Marko', 'age': 22}])
+
+with open('data/processed/people.csv', 'r') as f:
+    print(f.read())
+rezultat 
+name,age
+Ana,20
+Marko,22
