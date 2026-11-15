@@ -1,0 +1,112 @@
+import pandas as pd
+
+R = '/Volumes/bootcamp/northern_star/raw_2025_26/'
+m = pd.read_parquet(R + 'matches_2025_26.parquet')
+
+
+# 1. Analiza rezultata utakmica
+
+# 1.1 Pronaci sve utakmice u kojima su oba tima postigla bar po jedan gol.
+
+print("1.1 Oba tima postigla gol:")
+print(m.loc[(m['home_goals'] > 0) & (m['away_goals'] > 0)])
+
+
+# 1.2 Pronaci sve utakmice u kojima je domacin pobedio sa tacno jednim golom razlike.
+# NAMERNA GRESKA
+
+print("1.2 Pobeda domacina:")
+print(m.loc[m['home_goals'] - m['away_goals'] >= 1])
+
+
+# 1.3 Koliko utakmica je zavrseno rezultatom 0:0?
+
+print("1.3 Utakmice 0:0:")
+print(len(m.loc[(m['home_goals'] == 0) & (m['away_goals'] == 0)]))
+
+
+# 1.4 Prikazati 10 utakmica sa najvise ukupno postignutih golova.
+
+m['total_goals'] = m['home_goals'] + m['away_goals']
+
+print("1.4 Deset utakmica sa najvise golova:")
+print(m.sort_values('total_goals', ascending=False).head(10))
+
+
+
+# 2. Analiza jednog tima
+
+tim = 'NPM'
+
+# 2.1 Prikazati sve utakmice u kojima je tim ucestvovao.
+
+print("2.1 Sve utakmice tima:")
+print(m.loc[(m['home_team'] == tim) | (m['away_team'] == tim)])
+
+
+# 2.2 Koliko puta je tim pobedio, izgubio i odigrao nereseno?
+
+pobede = len(m.loc[((m['home_team'] == tim) & (m['home_goals'] > m['away_goals'])) |
+                    ((m['away_team'] == tim) & (m['away_goals'] > m['home_goals']))])
+
+porazi = len(m.loc[((m['home_team'] == tim) & (m['home_goals'] < m['away_goals'])) |
+                    ((m['away_team'] == tim) & (m['away_goals'] < m['home_goals']))])
+
+nereseno = len(m.loc[((m['home_team'] == tim) | (m['away_team'] == tim)) &
+                     (m['home_goals'] == m['away_goals'])])
+
+print("2.2 Rezultati tima:")
+print("Pobede:", pobede)
+print("Porazi:", porazi)
+print("Nereseno:", nereseno)
+
+
+# 2.3 Koliko je golova tim postigao kao domacin, a koliko kao gost?
+# NAMERNA GRESKA
+
+golovi_domacin = m.loc[m['home_team'] == tim, 'home_goals'].sum()
+
+golovi_gost = m.loc[m['away_team'] == tim, 'home_goals'].sum()
+
+print("2.3 Postignuti golovi:")
+print("Golovi kao domacin:", golovi_domacin)
+print("Golovi kao gost:", golovi_gost)
+
+
+# 2.4 Pronaci utakmicu u kojoj je tim postigao najvise golova.
+
+m['golovi_tima'] = 0
+
+m.loc[m['home_team'] == tim, 'golovi_tima'] = m['home_goals']
+m.loc[m['away_team'] == tim, 'golovi_tima'] = m['away_goals']
+
+print("2.4 Utakmica sa najvise golova:")
+print(m.loc[(m['home_team'] == tim) | (m['away_team'] == tim)].sort_values('golovi_tima', ascending=False).head(1))
+
+
+
+# 3. Analiza stadiona
+
+# 3.1 Prikazati sve razlicite stadione na kojima su odigrane utakmice.
+
+print("3.1 Svi stadioni:")
+print(m['stadium'].unique())
+
+
+# 3.2 Pronaci stadion na kojem je odigrano najvise utakmica.
+
+print("3.2 Broj utakmica po stadionima:")
+print(m['stadium'].value_counts())
+
+
+# 3.3 Za svaki stadion izracunati prosecnu posecenost.
+
+print("3.3 Prosecna posecenost:")
+print(m.groupby('stadium')['attendance'].mean().round(2))
+
+
+# 3.4 Prikazati pet stadiona sa najvecom prosecnom posecenoscu.
+# NAMERNA GRESKA
+
+print("3.4 Pet stadiona:")
+print(m.groupby('stadium')['attendance'].mean().sort_values(ascending=True).head(5).round(2))
