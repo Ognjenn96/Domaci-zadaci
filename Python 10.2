@@ -1,0 +1,134 @@
+
+import numpy as np
+
+# 1. Aktivni korisnici tokom 12 sati
+
+korisnici = np.array([105, 120, 145, 180, 210, 195, 160, 130, 115, 90, 75, 60])
+
+# 1.1 Broj korisnika za peti sat
+print(korisnici[4])
+
+# 1.2 Broj korisnika za poslednja 4 sata
+print(korisnici[-4:])
+
+# 1.3 Ukupan broj korisnika
+print(korisnici.sum())
+
+# 1.4 Prosecan broj korisnika po satu
+print(korisnici.mean())
+
+# 1.5 Sat sa najvecim brojem korisnika
+print(korisnici.argmax() + 1)
+
+
+
+
+
+# 2. CPU, RAM i disk za 5 servera
+
+serveri = np.array([
+    [40, 55, 70],
+    [65, 80, 60],
+    [75, 50, 85],
+    [30, 45, 55],
+    [90, 75, 80]
+])
+
+# 2.1 Dimenzije matrice
+print(serveri.shape)
+
+# 2.2 Broj servera i broj metrika
+print(serveri.shape[0])
+print(serveri.shape[1])
+
+# 2.3 Prosecna vrednost svake metrike
+print(serveri.mean(axis=0))
+
+# 2.4 Prosecna potrosnja za svaki server
+print(np.round(serveri.mean(axis=1), 2))
+
+# 2.5 Server sa najvecom prosecnom potrosnjom
+print(serveri.mean(axis=1).argmax() + 1)
+
+
+
+# 3. Vreme izvrsavanja 15 procesa u sekundama
+
+procesi = np.array([35, 120, 55, 80, 145, 25, 90, 110, 48, 70, 130, 40, 95, 15, 105])
+
+# 3.1 Procesi koji su trajali duze od 100 sekundi
+print(procesi[procesi > 100])
+
+# 3.2 Procesi koji su trajali izmedju 40 i 100 sekundi
+print(procesi[(procesi >= 40) & (procesi <= 100)])
+
+# 3.3 Broj procesa kracih od 50 sekundi
+print(len(procesi[procesi < 50]))
+
+# 3.4 Indeksi procesa duzih od 100 sekundi
+print(np.where(procesi > 100)[0])
+
+# 3.5 Prosecno vreme izvrsavanja
+print(procesi.mean())
+
+
+
+# 4. Prihodi od 4 kategorije proizvoda tokom 6 meseci
+
+prihodi = np.array([
+    [1000, 1200, 1100, 1300, 1400, 1500],
+    [800, 900, 1000, 1100, 1200, 1300],
+    [1500, 1600, 1700, 1800, 1900, 2000],
+    [600, 700, 800, 900, 1000, 1100]
+])
+
+# 4.1 Ukupan prihod svake kategorije
+print(prihodi.sum(axis=1))
+
+# 4.2 Ukupan prihod za svaki mesec
+print(prihodi.sum(axis=0))
+
+# 4.3 Kategorija sa najvecim prihodom
+print(prihodi.sum(axis=1).argmax() + 1)
+
+# 4.4 Mesec sa najvecim prihodom
+print(prihodi.sum(axis=0).argmax() + 1)
+
+# 4.5 Prosecan prihod po kategoriji
+print(prihodi.mean(axis=1))
+
+# 4.6 Prosecan mesecni prihod svih kategorija
+print(prihodi.mean(axis=0))
+
+
+
+# 5. Temperature tokom 15 dana
+
+temperature = np.array([22, 19, np.nan, 25, -25, 18, 55, 20, np.nan, 17, 30, 14, 60, -5, 21])
+
+# 5.1 Nedostajuce vrednosti
+print(np.isnan(temperature))
+
+# 5.2 Nevalidne temperature
+nevalidne = (temperature < -20) | (temperature > 50)
+print(temperature[nevalidne])
+
+# 5.3 Indeksi nevalidnih temperatura
+print(np.where(nevalidne)[0])
+
+# 5.4 Broj nedostajucih i nevalidnih vrednosti
+broj_nedostajucih = np.sum(np.isnan(temperature))
+broj_nevalidnih = np.sum(nevalidne)
+
+print(broj_nedostajucih)
+print(broj_nevalidnih)
+
+# 5.5 Procenat nedostajucih i nevalidnih vrednosti
+print((broj_nedostajucih + broj_nevalidnih) / len(temperature) * 100)
+
+# 5.6 Niz sa validnim temperaturama
+validne = temperature[(~np.isnan(temperature)) & (~nevalidne)]
+print(validne)
+
+# 5.7 Prosecna validna temperatura
+print(validne.mean())
